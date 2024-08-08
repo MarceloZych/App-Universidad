@@ -5,6 +5,8 @@ const db = require('./database/db')
 const port = 3000
 const estudianteRoutes = require('./routes/estudianteRoutes')
 const profesorRoutes = require('./routes/profesorRoutes')
+const cursoRoutes = require('./routes/cursosRoutes')
+const inscripcionRoutes = require('./routes/inscripcionRoutes')
 
 //middlewares
 app.use(express.json())
@@ -16,6 +18,8 @@ app.get('/', (req,res) => {
 
 app.use('/estudiantes', estudianteRoutes)
 app.use('/profesor', profesorRoutes)
+app.use('/cursos', cursoRoutes)
+app.use('/inscripciones', inscripcionRoutes)
 
 app.listen(port, ()=> {
     console.log(`Servidor escuchando en el puerto ${port}`)    

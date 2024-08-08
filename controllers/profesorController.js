@@ -43,7 +43,7 @@ class ProfesorController {
             if (result.affectedRows === 1) {
                 res.status(200).json({ res: "Actualizado" });
             } else {
-                res.status(404).json({ res: "No se encontró el estudiante" });
+                res.status(404).json({ res: "No se encontró el profesor" });
             }
         } catch (error) {
             res.status(500).send(error.message);
@@ -52,15 +52,28 @@ class ProfesorController {
 
     async eliminar(req, res) {
         const { id } = req.params;
+        const conn = await db.getConnection()
         try {
-            const [result] = await db.query('DELETE FROM profesores WHERE id=?', [id]);
+            await conn.beginTransaction()
+
+            const [cursosRes] = conn.query(`SELECT COUNT(*) AS cant FROM cursos WHERE profesor id`, [id])
+            if (cursosRes[0].cant > 0) {
+                await conn.rollback()// no es obligtorio en este caso, porque no hubo cambios
+                return res.status(400).json({mens: 'El profesor tiene cursos asignados'})
+            }
+
+            const [result] = await db.query('DELETE FROM profesores WHERE id=?', [id]); 
             if (result.affectedRows === 1) {
+                await conn.commit()
                 res.status(200).json({ res: "Borrado" });
             } else {
+                await conn.rollback()
                 res.status(404).json({ res: "No se encontró el estudiante" });
             }
         } catch (error) {
             res.status(500).send(error.message);
+        } finally {
+            conn.release()
         }
     }
 }
